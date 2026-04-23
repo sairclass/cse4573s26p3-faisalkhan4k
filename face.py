@@ -39,6 +39,27 @@ def detect_faces(img: torch.Tensor) -> List[List[float]]:
 
     ##### YOUR IMPLEMENTATION STARTS HERE #####
 
+    # Convert torch.Tensor (H x W x 3) to a uint8 numpy-compatible format
+    # face_recognition expects a numpy array, but we convert via bytes
+    # img is RGB torch.Tensor with values likely in [0, 255] or [0.0, 1.0]
+    
+
+    # img is shape (3, H, W), uint8, RGB — from torchvision.io.read_image()
+    # face_recognition needs (H, W, 3) uint8 numpy array
+    img_hwc = img.permute(1, 2, 0)         # (3, H, W) → (H, W, 3)
+    img_np = img_hwc.numpy()               # convert to numpy for face_recognition
+
+    # Detect face locations → list of (top, right, bottom, left)
+    face_locations = face_recognition.face_locations(img_np, model="hog")
+
+    # Convert to [x, y, width, height] as floats
+    for (top, right, bottom, left) in face_locations:
+        x      = float(left)
+        y      = float(top)
+        width  = float(right - left)
+        height = float(bottom - top)
+        detection_results.append([x, y, width, height])
+
     return detection_results
 
 
